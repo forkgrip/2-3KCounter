@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width" content="initial-scale=1.0">
-    <title>タイマー＆カウンター</title>
+    <title>2-3点数カウンター(記録のみ)</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -92,6 +92,12 @@
 </head>
 <body>
     <div class="container">
+        <div class="score full-width" id="scoreDisplay">
+            難易度を選択して，スタートを押すと，タイマー開始
+        </div>
+        <div class="score full-width" id="scoreDisplay">
+            終了ボタンで，点数に得点が表示されます
+        </div>
         <button id="startButton">スタート</button>
         <button id="stopButton">終了</button>
         <button id="easyButton" class="difficulty-button">カンタン</button>
@@ -118,6 +124,11 @@
         <div class="score full-width" id="scoreDisplay">
             点数 = 100 - (回数 × 2) - (経過秒数 - 基準秒) ... 基準秒: 簡単=180秒，ムズイ=240秒
         </div>
+        <div class="score full-width" id="scoreDisplay">
+            時間切れの場合は，どちらの難易度でも，30点に固定されます
+        </div>
+
+
     </div>
 
     <script>
