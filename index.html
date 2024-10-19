@@ -13,22 +13,26 @@
             justify-content: center;
             height: 100vh;
             background-color: #f0f0f0;
+            margin: 0;
         }
 
         .container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
-            width: 500px;
+            width: 90%;
+            max-width: 500px;
+            margin: 0 auto;
         }
 
         button, input[type="text"], .box {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             margin: 5px 0;
             border: 1px solid #ccc;
             border-radius: 5px;
             box-sizing: border-box;
+            font-size: 1.2em;
         }
 
         button {
@@ -49,7 +53,7 @@
 
         .counter-controls {
             display: flex;
-            gap: 5px;
+            gap: 10px;
             justify-content: center;
         }
 
@@ -61,6 +65,23 @@
         /* 押された難易度ボタンのスタイル */
         .selected {
             background-color: #FF6347 !important; /* トマト色 */
+        }
+
+        /* スマホ向けのスタイル */
+        @media (max-width: 600px) {
+            .container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            button, input[type="text"], .box {
+                padding: 10px;
+                font-size: 1em;
+            }
+
+            .counter-controls {
+                gap: 5px;
+            }
         }
     </style>
 </head>
@@ -76,7 +97,7 @@
         <div class="box">落とした回数</div>
         <div class="box" id="countDisplay">0</div>
 
-        <div class="counter-controls">
+        <div class="counter-controls full-width">
             <button id="decreaseButton">-</button>
             <button id="increaseButton">+</button>
         </div>
@@ -88,7 +109,7 @@
 
         <button class="full-width" id="resetButton">リセット</button>
 
-        <div class="score" id="scoreDisplay">
+        <div class="score full-width" id="scoreDisplay">
             点数 = 100 - (回数 × 2) - (経過秒数 - 基準秒)
         </div>
     </div>
@@ -134,7 +155,7 @@
             // ニックネームが未入力の場合、アラートを表示
             const nickname = document.getElementById('nickname').value.trim();
             if (nickname === '') {
-                alert('お名前を入力してください。');
+                alert('名前を入力してください。');
             }
         });
 
