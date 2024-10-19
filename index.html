@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>タイマー＆カウンター</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            width: 500px;
+        }
+
+        button, input[type="text"], .box {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .full-width {
+            grid-column: span 4;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .counter-controls {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .score {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        /* 押された難易度ボタンのスタイル */
+        .selected {
+            background-color: #FF6347 !important; /* トマト色 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button id="startButton">スタート</button>
+        <button id="stopButton">終了</button>
+        <button id="easyButton">カンタン</button>
+        <button id="hardButton">ムズイ</button>
+
+        <div class="box full-width" id="timerDisplay">タイマー: 0m 0s</div>
+
+        <div class="box">落とした回数</div>
+        <div class="box" id="countDisplay">0</div>
+
+        <div class="counter-controls">
+            <button id="decreaseButton">-</button>
+            <button id="increaseButton">+</button>
+        </div>
+
+        <div class="box full-width">
+            <label for="nickname">ニックネーム</label>
+            <input type="text" id="nickname" placeholder="名前を入力">
+        </div>
+
+        <button class="full-width" id="resetButton">リセット</button>
+
+        <div class="score" id="scoreDisplay">
+            点数 = 100 - (回数 × 2) - (経過秒数 - 基準秒)
+        </div>
+    </div>
+
+    <script>
+        let timer; // タイマー制御用の変数
+        let elapsedSeconds = 0; // 経過時間（秒）
+        let count = 0; // 落とした回数
+        let baseTime = null; // カンタン/ムズイで変わる基準秒
+        let selectedDifficulty = null; // 現在選択されている難易度
+
+        // タイマー表示の更新関数
+        function updateTimerDisplay() {
+            const minutes = Math.floor(elapsedSeconds / 60);
+            const seconds = elapsedSeconds % 60;
+            document.getElementById('timerDisplay').textContent = `タイマー: ${minutes}m ${seconds}s`;
+        }
+
+        // 点数の更新関数 (終了時のみ呼ばれる)
+        function updateScore() {
+            const score = 100 - (count * 2) - (elapsedSeconds - baseTime);
+            document.getElementById('scoreDisplay').textContent = `点数 = ${score}`;
+        }
+
+        // タイマーのスタート処理
+        document.getElementById('startButton').addEventListener('click', () => {
+            if (baseTime === null) {
+                alert('「カンタン」か「ムズイ」を選択してください。');
+                return; // タイマーをスタートしない
+            }
+            clearInterval(timer); // 二重実行を防ぐため停止
+            timer = setInterval(() => {
+                elapsedSeconds++;
+                updateTimerDisplay();
+            }, 1000);
+        });
+
+        // タイマーの終了処理（点数を計算・表示）
+        document.getElementById('stopButton').addEventListener('click', () => {
+            clearInterval(timer);
+            updateScore(); // 点数を更新
+            
+            // ニックネームが未入力の場合、アラートを表示
+            const nickname = document.getElementById('nickname').value.trim();
+            if (nickname === '') {
+                alert('お名前を入力してください。');
+            }
+        });
+
+        // カウントの増加
+        document.getElementById('increaseButton').addEventListener('click', () => {
+            count++;
+            document.getElementById('countDisplay').textContent = count;
+        });
+
+        // カウントの減少
+        document.getElementById('decreaseButton').addEventListener('click', () => {
+            if (count > 0) {
+                count--;
+                document.getElementById('countDisplay').textContent = count;
+            }
+        });
+
+        // 難易度ボタンが押されたときに色を変更する
+        function selectDifficulty(buttonId, time) {
+            baseTime = time;
+            selectedDifficulty = buttonId; // 現在の難易度を保持
+
+            // 全ての難易度ボタンの選択状態を解除する
+            document.getElementById('easyButton').classList.remove('selected');
+            document.getElementById('hardButton').classList.remove('selected');
+            
+            // 押されたボタンに選択状態を付与する
+            document.getElementById(buttonId).classList.add('selected');
+        }
+
+        // 「カンタン」ボタンが押されたとき
+        document.getElementById('easyButton').addEventListener('click', () => {
+            selectDifficulty('easyButton', 400); // カンタンの基準秒
+        });
+
+        // 「ムズイ」ボタンが押されたとき
+        document.getElementById('hardButton').addEventListener('click', () => {
+            selectDifficulty('hardButton', 300); // ムズイの基準秒
+        });
+
+        // リセットボタンの処理
+        document.getElementById('resetButton').addEventListener('click', () => {
+            // タイマーのリセット
+            clearInterval(timer);
+            elapsedSeconds = 0;
+            updateTimerDisplay();
+
+            // カウントのリセット
+            count = 0;
+            document.getElementById('countDisplay').textContent = count;
+
+            // ニックネームのリセット
+            document.getElementById('nickname').value = '';
+
+            // 点数のリセット
+            document.getElementById('scoreDisplay').textContent = '点数 = 100 - (回数 × 2) - (経過秒数 - 基準秒)';
+
+            // 難易度ボタンの選択状態はリセットされない
+        });
+    </script>
+</body>
+</html>
