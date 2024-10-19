@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width" content="initial-scale=1.0">
     <title>タイマー＆カウンター</title>
     <style>
         body {
@@ -36,7 +36,7 @@
         }
 
         button {
-            background-color: #4CAF50;
+            background-color: #4CAF50; /* デフォルトのボタン色 */
             color: white;
             cursor: pointer;
         }
@@ -64,7 +64,12 @@
 
         /* 押された難易度ボタンのスタイル */
         .selected {
-            background-color: #FF6347 !important; /* トマト色 */
+            background-color: #4CAF50 !important; /* 緑色 */
+        }
+
+        /* 初期状態の難易度ボタンのスタイル */
+        .difficulty-button {
+            background-color: #FF6347; /* トマト色 */
         }
 
         /* スマホ向けのスタイル */
@@ -89,10 +94,11 @@
     <div class="container">
         <button id="startButton">スタート</button>
         <button id="stopButton">終了</button>
-        <button id="easyButton">カンタン</button>
-        <button id="hardButton">ムズイ</button>
+        <button id="easyButton" class="difficulty-button">カンタン</button>
+        <button id="hardButton" class="difficulty-button">ムズイ</button>
 
-        <div class="box full-width" id="timerDisplay">タイマー: 0m 0s</div>
+        <div class="box full-width" id="timerDisplay">経過時間: 0m 0s</div>
+        <div class="box full-width" id="countdownDisplay">残り時間: 0m 0s</div>
 
         <div class="box">落とした回数</div>
         <div class="box" id="countDisplay">0</div>
@@ -110,27 +116,31 @@
         <button class="full-width" id="resetButton">リセット</button>
 
         <div class="score full-width" id="scoreDisplay">
-            点数 = 100 - (回数 × 2) + (基準秒 - 経過秒数)
-        </div>
-
-        
-        <div class="score full-width" id="scoreDisplay">
-            経過時間が，簡単(3分)，難しい(4分)を超えた場合，点数は自動で30点になります
+            点数 = 100 - (回数 × 2) - (経過秒数 - 基準秒) ... 基準秒: 簡単=180秒，ムズイ=240秒
         </div>
     </div>
 
     <script>
         let timer; // タイマー制御用の変数
+        let countdown; // カウントダウン用の変数
         let elapsedSeconds = 0; // 経過時間（秒）
         let count = 0; // 落とした回数
         let baseTime = null; // カンタン/ムズイで変わる基準秒
+        let countdownTime = 0; // カウントダウンの時間
         let selectedDifficulty = null; // 現在選択されている難易度
 
         // タイマー表示の更新関数
         function updateTimerDisplay() {
-            const minutes = Math.floor(elapsedSeconds / 60);
-            const seconds = elapsedSeconds % 60;
-            document.getElementById('timerDisplay').textContent = `タイマー: ${minutes}m ${seconds}s`;
+            const minutes = Math.floor(countdownTime / 60);
+            const seconds = countdownTime % 60;
+            document.getElementById('countdownDisplay').textContent = `カウントダウン: ${minutes}m ${seconds}s`;
+        }
+
+        // 経過時間の表示を更新する関数
+        function updateElapsedDisplay() {
+            const elapsedMinutes = Math.floor(elapsedSeconds / 60);
+            const elapsedSecondsDisplay = elapsedSeconds % 60;
+            document.getElementById('timerDisplay').textContent = `経過時間: ${elapsedMinutes}m ${elapsedSecondsDisplay}s`;
         }
 
         // 点数の更新関数 (終了時のみ呼ばれる)
@@ -152,15 +162,35 @@
                 return; // タイマーをスタートしない
             }
             clearInterval(timer); // 二重実行を防ぐため停止
+            clearInterval(countdown); // カウントダウンを停止
+
+            // カウントダウンの時間を設定
+            countdownTime = selectedDifficulty === 'easyButton' ? 180 : 240; // カンタン=3分, ムズイ=4分
+            updateTimerDisplay(); // カウントダウン表示の初期化
+
+            countdown = setInterval(() => {
+                if (countdownTime > 0) {
+                    countdownTime--;
+                    updateTimerDisplay();
+                } else {
+                    clearInterval(countdown);
+                    // 終了時の処理を呼び出す
+                    updateScore(); // 点数を更新
+                    alert('時間切れ！');
+                }
+            }, 1000);
+
+            // タイマーの経過時間を更新する
             timer = setInterval(() => {
                 elapsedSeconds++;
-                updateTimerDisplay();
+                updateElapsedDisplay(); // 経過時間表示を更新
             }, 1000);
         });
 
         // タイマーの終了処理（点数を計算・表示）
         document.getElementById('stopButton').addEventListener('click', () => {
             clearInterval(timer);
+            clearInterval(countdown); // カウントダウンを停止
             updateScore(); // 点数を更新
         });
 
@@ -205,8 +235,11 @@
         document.getElementById('resetButton').addEventListener('click', () => {
             // タイマーのリセット
             clearInterval(timer);
+            clearInterval(countdown);
             elapsedSeconds = 0;
-            updateTimerDisplay();
+            countdownTime = 0; // カウントダウンもリセット
+            updateElapsedDisplay(); // 経過時間の表示をリセット
+            updateTimerDisplay(); // カウントダウンの表示をリセット
 
             // カウントのリセット
             count = 0;
@@ -217,6 +250,9 @@
 
             // 点数のリセット
             document.getElementById('scoreDisplay').textContent = '点数 = 100 - (回数 × 2) - (経過秒数 - 基準秒)';
+
+            // 基準秒のリセット
+            baseTime = null;
 
             // 難易度ボタンの選択状態はリセットされない
         });
