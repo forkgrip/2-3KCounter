@@ -115,7 +115,7 @@
 
         
         <div class="score full-width" id="scoreDisplay">
-            経過時間が，簡単(4分)，難しい(3分)を超えた場合，点数は自動で30点になります
+            経過時間が，簡単(3分)，難しい(4分)を超えた場合，点数は自動で30点になります
         </div>
     </div>
 
@@ -193,12 +193,12 @@
 
         // 「カンタン」ボタンが押されたとき
         document.getElementById('easyButton').addEventListener('click', () => {
-            selectDifficulty('easyButton', 240); // カンタンの基準秒
+            selectDifficulty('easyButton', 180); // カンタンの基準秒
         });
 
         // 「ムズイ」ボタンが押されたとき
         document.getElementById('hardButton').addEventListener('click', () => {
-            selectDifficulty('hardButton', 180); // ムズイの基準秒
+            selectDifficulty('hardButton', 240); // ムズイの基準秒
         });
 
         // リセットボタンの処理
