@@ -110,7 +110,12 @@
         <button class="full-width" id="resetButton">リセット</button>
 
         <div class="score full-width" id="scoreDisplay">
-            点数 = 100 - (回数 × 2) - (経過秒数 - 基準秒)
+            点数 = 100 - (回数 × 2) + (基準秒 - 経過秒数)
+        </div>
+
+        
+        <div class="score full-width" id="scoreDisplay">
+            経過時間が，簡単(4分)，難しい(3分)を超えた場合，点数は自動で30点になります
         </div>
     </div>
 
@@ -130,7 +135,13 @@
 
         // 点数の更新関数 (終了時のみ呼ばれる)
         function updateScore() {
-            const score = 100 - (count * 2) - (elapsedSeconds - baseTime);
+            let score;
+            // 経過時間が基準秒を超えた場合、点数を30にする
+            if (elapsedSeconds > baseTime) {
+                score = 30;
+            } else {
+                score = 100 - (count * 2) - (elapsedSeconds - baseTime);
+            }
             document.getElementById('scoreDisplay').textContent = `点数 = ${score}`;
         }
 
@@ -151,12 +162,6 @@
         document.getElementById('stopButton').addEventListener('click', () => {
             clearInterval(timer);
             updateScore(); // 点数を更新
-            
-            // ニックネームが未入力の場合、アラートを表示
-            const nickname = document.getElementById('nickname').value.trim();
-            if (nickname === '') {
-                alert('名前を入力してください。');
-            }
         });
 
         // カウントの増加
@@ -188,12 +193,12 @@
 
         // 「カンタン」ボタンが押されたとき
         document.getElementById('easyButton').addEventListener('click', () => {
-            selectDifficulty('easyButton', 400); // カンタンの基準秒
+            selectDifficulty('easyButton', 240); // カンタンの基準秒
         });
 
         // 「ムズイ」ボタンが押されたとき
         document.getElementById('hardButton').addEventListener('click', () => {
-            selectDifficulty('hardButton', 300); // ムズイの基準秒
+            selectDifficulty('hardButton', 180); // ムズイの基準秒
         });
 
         // リセットボタンの処理
